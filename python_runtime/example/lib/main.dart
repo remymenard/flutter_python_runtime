@@ -21,7 +21,10 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   String? _platformName;
-
+@override
+  void initState() {
+    super.initState();
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -55,6 +58,12 @@ class _HomePageState extends State<HomePage> {
                 }
               },
               child: const Text('Get Platform Name'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                await createEnvironment();
+              },
+              child: const Text('Create Environment'),
             ),
           ],
         ),

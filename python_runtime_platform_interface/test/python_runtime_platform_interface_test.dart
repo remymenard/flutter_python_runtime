@@ -6,6 +6,9 @@ class PythonRuntimeMock extends PythonRuntimePlatform {
 
   @override
   Future<String?> getPlatformName() async => mockPlatformName;
+
+  @override
+  Future<bool?> createEnvironment() async => true;
 }
 
 void main() {
@@ -24,6 +27,12 @@ void main() {
           await PythonRuntimePlatform.instance.getPlatformName(),
           equals(PythonRuntimeMock.mockPlatformName),
         );
+      });
+    });
+
+    group('createEnvironment', () {
+      test('returns true', () async {
+        expect(await PythonRuntimePlatform.instance.createEnvironment(), isTrue);
       });
     });
   });

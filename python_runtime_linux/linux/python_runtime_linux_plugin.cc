@@ -8,7 +8,7 @@
 
 const char kChannelName[] = "python_runtime_linux";
 const char kGetPlatformName[] = "getPlatformName";
-
+const char kCreateEnvironment[] = "createEnvironment";
 struct _FlPythonRuntimePlugin {
   GObject parent_instance;
 
@@ -28,6 +28,8 @@ static void method_call_cb(FlMethodChannel* channel, FlMethodCall* method_call,
   g_autoptr(FlMethodResponse) response = nullptr;
   if (strcmp(method, kGetPlatformName) == 0)
     response = FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_string("Linux")));
+  else if (strcmp(method, kCreateEnvironment) == 0)
+    response = FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_bool(true)));
   else
     response = FL_METHOD_RESPONSE(fl_method_not_implemented_response_new());
 

@@ -21,6 +21,8 @@ void main() {
         switch (methodCall.method) {
           case 'getPlatformName':
             return kPlatformName;
+          case 'createEnvironment':
+            return true;
           default:
             return null;
         }

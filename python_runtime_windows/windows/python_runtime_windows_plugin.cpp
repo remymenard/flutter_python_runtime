@@ -57,6 +57,9 @@ void PythonRuntimeWindows::HandleMethodCall(
   if (method_call.method_name().compare("getPlatformName") == 0) {
     result->Success(EncodableValue("Windows"));
   }
+  else if (method_call.method_name().compare("createEnvironment") == 0) {
+    result->Success(EncodableValue(true));
+  }
   else {
     result->NotImplemented();
   }

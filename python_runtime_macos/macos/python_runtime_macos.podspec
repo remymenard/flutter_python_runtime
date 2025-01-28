@@ -18,5 +18,15 @@ Pod::Spec.new do |s|
   s.platform = :osx
   s.osx.deployment_target = '10.11'
   s.swift_version = '5.0'
+
+  # Only include the micromamba binary in resources
+  s.resources = ['Resources/micromamba/bin/*']
+
+  # Add a script phase to download micromamba
+  s.script_phase = {
+    :name => 'Download Micromamba',
+    :script => 'cd "${PODS_TARGET_SRCROOT}" && ./download_micromamba.sh',
+    :execution_position => :before_compile
+  }
 end
 

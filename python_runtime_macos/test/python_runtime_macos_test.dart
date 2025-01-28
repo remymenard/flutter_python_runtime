@@ -21,6 +21,8 @@ void main() {
         switch (methodCall.method) {
           case 'getPlatformName':
             return kPlatformName;
+          case 'createEnvironment':
+            return true;
           default:
             return null;
         }
@@ -39,6 +41,26 @@ void main() {
         <Matcher>[isMethodCall('getPlatformName', arguments: null)],
       );
       expect(name, equals(kPlatformName));
+    });
+
+    test('createEnvironment executes successfully', () async {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(pythonRuntime.methodChannel, (methodCall) async {
+        log.add(methodCall);
+        switch (methodCall.method) {
+          case 'createEnvironment':
+            return true;
+          default:
+            return null;
+        }
+      });
+
+      final success = await pythonRuntime.createEnvironment();
+      expect(
+        log,
+        <Matcher>[isMethodCall('createEnvironment', arguments: null)],
+      );
+      expect(success, isTrue);
     });
   });
 }

@@ -8,3 +8,8 @@ Future<String> getPlatformName() async {
   if (platformName == null) throw Exception('Unable to get platform name.');
   return platformName;
 }
+
+/// Creates a Python environment using the current platform's method.
+Future<bool?> createEnvironment() async {
+  return _platform.createEnvironment();
+}

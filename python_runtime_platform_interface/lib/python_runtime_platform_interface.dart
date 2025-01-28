@@ -30,4 +30,6 @@ abstract class PythonRuntimePlatform extends PlatformInterface {
 
   /// Return the current platform name.
   Future<String?> getPlatformName();
+
+  Future<bool?> createEnvironment();
 }

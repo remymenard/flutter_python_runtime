@@ -17,4 +17,9 @@ class PythonRuntimeLinux extends PythonRuntimePlatform {
   Future<String?> getPlatformName() {
     return methodChannel.invokeMethod<String>('getPlatformName');
   }
+
+  @override
+  Future<bool?> createEnvironment() {
+    return methodChannel.invokeMethod<bool>('createEnvironment');
+  }
 }
