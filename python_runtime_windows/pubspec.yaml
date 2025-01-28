@@ -1,0 +1,26 @@
+name: python_runtime_windows
+description: Windows implementation of the python_runtime plugin
+version: 0.1.0+1
+publish_to: none
+
+environment:
+  sdk: ^3.5.0
+
+flutter:
+  plugin:
+    implements: python_runtime
+    platforms:
+      windows:
+        pluginClass: PythonRuntimeWindows
+        dartPluginClass: PythonRuntimeWindows
+
+dependencies:
+  flutter:
+    sdk: flutter
+  python_runtime_platform_interface:
+    path: ../python_runtime_platform_interface
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  very_good_analysis: ^6.0.0

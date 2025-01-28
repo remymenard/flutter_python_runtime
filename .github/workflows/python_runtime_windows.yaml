@@ -1,0 +1,26 @@
+name: python_runtime_windows
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/python_runtime_windows.yaml"
+      - "python_runtime_windows/**"
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/python_runtime_windows.yaml"
+      - "python_runtime_windows/**"
+
+jobs:
+  build:
+    uses: VeryGoodOpenSource/very_good_workflows/.github/workflows/flutter_package.yml@v1
+    with:
+      flutter_channel: stable
+      flutter_version: 3.24.0
+      working_directory: python_runtime_windows
+

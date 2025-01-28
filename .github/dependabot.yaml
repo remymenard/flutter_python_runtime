@@ -1,0 +1,31 @@
+version: 2
+enable-beta-ecosystems: true
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "pub"
+    directory: "/python_runtime"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "pub"
+    directory: "/python_runtime/example"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "pub"
+    directory: "/python_runtime_platform_interface"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "pub"
+    directory: "/python_runtime_linux"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "pub"
+    directory: "/python_runtime_macos"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "pub"
+    directory: "/python_runtime_windows"
+    schedule:
+      interval: "daily"

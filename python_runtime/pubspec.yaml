@@ -1,0 +1,37 @@
+name: python_runtime
+description: Emebed a python runtime in a Flutter Desktop app.
+version: 0.1.0+1
+publish_to: none
+
+environment:
+  sdk: ^3.5.0
+
+flutter:
+  plugin:
+    platforms:
+      linux:
+        default_package: python_runtime_linux
+      macos:
+        default_package: python_runtime_macos
+      windows:
+        default_package: python_runtime_windows
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  python_runtime_linux:
+    path: ../python_runtime_linux
+  python_runtime_macos:
+    path: ../python_runtime_macos
+  python_runtime_platform_interface:
+    path: ../python_runtime_platform_interface
+  python_runtime_windows:
+    path: ../python_runtime_windows
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  mocktail: ^1.0.4
+  plugin_platform_interface: ^2.1.8
+  very_good_analysis: ^6.0.0
