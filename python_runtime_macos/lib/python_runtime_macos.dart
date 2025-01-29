@@ -20,10 +20,13 @@ class PythonRuntimeMacOS extends PythonRuntimePlatform {
 
   /// Creates a Python environment using micromamba
   @override
-  Future<bool> createEnvironment() async {
+  Future<bool> createEnvironment(String pythonVersion, String environmentName) async {
     try {
       debugPrint('Creating Python environment');
-      final result = await methodChannel.invokeMethod<bool>('createEnvironment');
+      final result = await methodChannel.invokeMethod<bool>('createEnvironment', {
+        'pythonVersion': pythonVersion,
+        'environmentName': environmentName,
+      });
       debugPrint('Result: $result');
       return result ?? false;
     } catch (e) {

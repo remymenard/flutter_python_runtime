@@ -8,7 +8,7 @@ class PythonRuntimeMock extends PythonRuntimePlatform {
   Future<String?> getPlatformName() async => mockPlatformName;
 
   @override
-  Future<bool?> createEnvironment() async => true;
+  Future<bool?> createEnvironment(String pythonVersion, String environmentName) async => true;
 }
 
 void main() {
@@ -32,7 +32,7 @@ void main() {
 
     group('createEnvironment', () {
       test('returns true', () async {
-        expect(await PythonRuntimePlatform.instance.createEnvironment(), isTrue);
+        expect(await PythonRuntimePlatform.instance.createEnvironment('3.10', 'test'), isTrue);
       });
     });
   });

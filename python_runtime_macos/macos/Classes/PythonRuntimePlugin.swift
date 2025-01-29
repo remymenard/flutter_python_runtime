@@ -16,99 +16,107 @@ public class PythonRuntimePlugin: NSObject, FlutterPlugin {
       result("MacOS")
     case "createEnvironment":
       debugPrint("Creating Python environment")
-      downloadMicromamba { success in
-        result(success)
+      guard let args = call.arguments as? [String: Any],
+            let pythonVersion = args["pythonVersion"] as? String,
+            let environmentName = args["environmentName"] as? String else {
+          result(FlutterError(code: "INVALID_ARGUMENTS",
+                             message: "Missing or invalid arguments",
+                             details: nil))
+          return
+      }
+      createEnvironment(pythonVersion: pythonVersion, environmentName: environmentName) { success in
+          result(success)
       }
     default:
       result(FlutterMethodNotImplemented)
     }
   }
   
-  private func downloadMicromamba(completion: @escaping (Bool) -> Void) {
+  private func createEnvironment(pythonVersion: String, environmentName: String, completion: @escaping (Bool) -> Void) {
     // Get the bundle for this plugin
-    let bundle = Bundle(for: PythonRuntimePlugin.self)
-    debugPrint("Plugin bundle path: \(bundle.bundlePath)")
+    let bundle = Bundle(for: type(of: self))
     
-    // List all resources in the plugin bundle
-    if let resources = bundle.urls(forResourcesWithExtension: nil, subdirectory: nil) {
-        debugPrint("Resources in plugin bundle:")
-        resources.forEach { debugPrint("- \($0.path)") }
-    }
-    
-    // Get the resource bundle
-    guard let resourceBundleURL = bundle.url(forResource: "python_runtime_macos_resources", withExtension: "bundle") else {
-        debugPrint("Could not find resource bundle URL")
+    // Get the path to the App.framework, which contains the Flutter assets
+    let bundleURL = bundle.bundleURL.deletingLastPathComponent()
+    guard let appFrameworkBundle = Bundle(url: bundleURL.appendingPathComponent("App.framework")) else {
+        debugPrint("Failed to find App.framework bundle")
         completion(false)
         return
     }
-    debugPrint("Resource bundle URL: \(resourceBundleURL.path)")
     
-    guard let resourceBundle = Bundle(url: resourceBundleURL) else {
-        debugPrint("Could not create bundle from URL: \(resourceBundleURL.path)")
-        completion(false)
-        return
-    }
-    debugPrint("Resource bundle path: \(resourceBundle.bundlePath)")
+    // Get the path to the micromamba binary in the Flutter assets
+    let searchPath = "flutter_assets/packages/python_runtime_macos/assets"
+    debugPrint("Searching for micromamba in bundle: \(appFrameworkBundle.bundlePath)")
+    debugPrint("Looking in directory: \(searchPath)")
     
-    // List all resources in the resource bundle
-    if let bundleResources = resourceBundle.urls(forResourcesWithExtension: nil, subdirectory: nil) {
-        debugPrint("Resources in resource bundle:")
-        bundleResources.forEach { debugPrint("- \($0.path)") }
-    }
-    
-    guard let micromambaURL = resourceBundle.url(forResource: "micromamba", withExtension: nil, subdirectory: "micromamba/bin") else {
-        debugPrint("Could not find micromamba in resource bundle")
-        debugPrint("Tried subdirectory: micromamba/bin")
-        
-        // Try listing contents of micromamba directory if it exists
-        if let micromambaDir = resourceBundle.url(forResource: nil, withExtension: nil, subdirectory: "micromamba")?.path,
-           FileManager.default.fileExists(atPath: micromambaDir) {
-            do {
-                let contents = try FileManager.default.contentsOfDirectory(atPath: micromambaDir)
-                debugPrint("Contents of micromamba directory:")
-                contents.forEach { debugPrint("- \($0)") }
-            } catch {
-                debugPrint("Error listing micromamba directory: \(error)")
+    guard let micromambaPath = appFrameworkBundle.path(forResource: "micromamba", ofType: nil, inDirectory: searchPath) else {
+        debugPrint("Failed to find micromamba binary")
+        // List the contents of the bundle to help debug
+        if let enumerator = FileManager.default.enumerator(atPath: appFrameworkBundle.bundlePath) {
+            debugPrint("Bundle contents:")
+            while let filePath = enumerator.nextObject() as? String {
+                debugPrint("  \(filePath)")
             }
-        } else {
-            debugPrint("micromamba directory not found in resource bundle")
         }
-        
         completion(false)
         return
     }
     
-    debugPrint("Bundle micromamba path: \(micromambaURL.path)")
+    debugPrint("Found micromamba at: \(micromambaPath)")
     
-    let appSupportURL = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
-    let micromambaDir = appSupportURL.appendingPathComponent("micromamba")
-    let micromambaPath = micromambaDir.appendingPathComponent("bin/micromamba")
+    // Make sure micromamba is executable
+    let fileManager = FileManager.default
+    try? fileManager.setAttributes([.posixPermissions: 0o755], ofItemAtPath: micromambaPath)
     
-    debugPrint("Target micromamba path: \(micromambaPath.path)")
+    // Create a process to run micromamba
+    let process = Process()
+    process.executableURL = URL(fileURLWithPath: micromambaPath)
     
-    // Check if micromamba already exists in app support
-    if FileManager.default.fileExists(atPath: micromambaPath.path) {
-        debugPrint("Micromamba already exists in app support")
-        completion(true)
-        return
-    }
+    // Set up environment variables
+    let homeDir = FileManager.default.homeDirectoryForCurrentUser.path
+    let micromambaRoot = "\(homeDir)/.micromamba"
     
-    // Create directory if it doesn't exist
+    // Create micromamba root directory if it doesn't exist
+    try? fileManager.createDirectory(atPath: micromambaRoot, withIntermediateDirectories: true)
+    
+    var env = ProcessInfo.processInfo.environment
+    env["MAMBA_ROOT_PREFIX"] = homeDir
+    env["MAMBA_EXE"] = micromambaPath
+    process.environment = env
+    
+    // Set up the arguments for creating the environment
+    process.arguments = [
+        "create",
+        "-n", environmentName,
+        "-c", "conda-forge",
+        "python=\(pythonVersion)",
+        "-y",
+        "--root-prefix", homeDir
+    ]
+    
+    // Set up pipes for output
+    let outputPipe = Pipe()
+    let errorPipe = Pipe()
+    process.standardOutput = outputPipe
+    process.standardError = errorPipe
+    
+    // Launch the process
     do {
-        try FileManager.default.createDirectory(at: micromambaDir.appendingPathComponent("bin"), withIntermediateDirectories: true)
+        try process.run()
+        process.waitUntilExit()
         
-        // Copy micromamba from bundle to app support
-        if FileManager.default.fileExists(atPath: micromambaURL.path) {
-            try FileManager.default.copyItem(at: micromambaURL, to: micromambaPath)
-            try FileManager.default.setAttributes([.posixPermissions: 0o755], ofItemAtPath: micromambaPath.path)
-            debugPrint("Successfully copied micromamba to app support")
+        let status = process.terminationStatus
+        if status == 0 {
+            debugPrint("Successfully created Python environment")
             completion(true)
         } else {
-            debugPrint("Error: Micromamba not found in bundle at \(micromambaURL.path)")
+            let errorData = errorPipe.fileHandleForReading.readDataToEndOfFile()
+            let errorOutput = String(data: errorData, encoding: .utf8) ?? "Unknown error"
+            debugPrint("Failed to create Python environment: \(errorOutput)")
             completion(false)
         }
     } catch {
-        debugPrint("Error setting up micromamba: \(error)")
+        debugPrint("Failed to run micromamba: \(error)")
         completion(false)
     }
   }

@@ -1,24 +1,18 @@
 #!/bin/bash
 set -e
 
-echo "Starting micromamba download..."
+echo "Setting up micromamba..."
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-MICROMAMBA_DIR="$SCRIPT_DIR/Resources/micromamba"
-echo "Download directory: $MICROMAMBA_DIR"
+ASSETS_DIR="$SCRIPT_DIR/../../assets"
+MICROMAMBA_PATH="$ASSETS_DIR/micromamba"
 
-mkdir -p "$MICROMAMBA_DIR/bin"
-echo "Created directory structure"
-
-echo "Downloading micromamba..."
-curl -L "https://micro.mamba.pm/api/micromamba/osx-arm64/latest" | tar xvj -C "$MICROMAMBA_DIR" bin/micromamba
-
-if [ -f "$MICROMAMBA_DIR/bin/micromamba" ]; then
+if [ -f "$MICROMAMBA_PATH" ]; then
     echo "Micromamba binary found"
-    chmod +x "$MICROMAMBA_DIR/bin/micromamba"
+    chmod +x "$MICROMAMBA_PATH"
     echo "Made micromamba executable"
 else
-    echo "Error: Micromamba binary not found!"
-    ls -la "$MICROMAMBA_DIR/bin"
+    echo "Error: Micromamba binary not found at $MICROMAMBA_PATH!"
+    ls -la "$ASSETS_DIR"
     exit 1
 fi
 

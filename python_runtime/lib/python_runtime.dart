@@ -10,6 +10,7 @@ Future<String> getPlatformName() async {
 }
 
 /// Creates a Python environment using the current platform's method.
-Future<bool?> createEnvironment() async {
-  return _platform.createEnvironment();
+Future<bool?> createEnvironment(
+    String pythonVersion, String environmentName) async {
+  return _platform.createEnvironment(pythonVersion, environmentName);
 }

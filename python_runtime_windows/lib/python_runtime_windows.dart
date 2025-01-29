@@ -19,7 +19,10 @@ class PythonRuntimeWindows extends PythonRuntimePlatform {
   }
 
   @override
-  Future<bool?> createEnvironment() {
-    return methodChannel.invokeMethod<bool>('createEnvironment');
+  Future<bool?> createEnvironment(String pythonVersion, String environmentName) {
+    return methodChannel.invokeMethod<bool>('createEnvironment', {
+      'pythonVersion': pythonVersion,
+      'environmentName': environmentName,
+    });
   }
 }

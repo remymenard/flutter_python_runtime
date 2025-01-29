@@ -55,7 +55,7 @@ void main() {
         }
       });
 
-      final success = await pythonRuntime.createEnvironment();
+      final success = await pythonRuntime.createEnvironment('3.11.9', 'env_test');
       expect(
         log,
         <Matcher>[isMethodCall('createEnvironment', arguments: null)],

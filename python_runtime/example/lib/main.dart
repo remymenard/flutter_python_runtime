@@ -61,7 +61,7 @@ class _HomePageState extends State<HomePage> {
             ),
             ElevatedButton(
               onPressed: () async {
-                await createEnvironment();
+                await createEnvironment('3.11.9', 'env_test');
               },
               child: const Text('Create Environment'),
             ),
